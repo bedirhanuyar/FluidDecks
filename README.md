@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Icon.svg" width="150" alt="logo">
+  <img src="Icon.svg" width="200" alt="logo">
 </p>
 
 # FluidDecks
