@@ -1,0 +1,242 @@
+<UserControl x:Class="FluidDecks.UI.Controls.DeckPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="250"
+             RenderOptions.CachingHint="Cache"
+             RenderOptions.BitmapScalingMode="HighQuality">
+    
+    <Grid Margin="0" VerticalAlignment="Top" HorizontalAlignment="Left">
+        
+        <!-- The Main Widget Surface (Collapsed: 80x110 to fit icon + label) -->
+        <Border x:Name="RootBorder" CornerRadius="8" Width="80" Height="110"
+                AllowDrop="True"
+                Drop="Panel_Drop"
+                DragEnter="Panel_DragEnter"
+                DragOver="Panel_DragEnter"
+                Background="#20000000"> <!-- More transparent when collapsed for clean desktop widget look -->
+            
+            <!-- Modern, subtle border without massive drop shadow for Native Blur -->
+            <Border.BorderBrush>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="#33FFFFFF" Offset="0"/>
+                    <GradientStop Color="#05FFFFFF" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.BorderBrush>
+            <Border.BorderThickness>
+                <Thickness Left="1" Top="1" Right="1" Bottom="1"/>
+            </Border.BorderThickness>
+            <Border.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Delete Virtual Folder" Click="MenuItemDeleteFolder_Click" />
+                </ContextMenu>
+            </Border.ContextMenu>
+            
+            <Grid>
+                <!-- 1. Collapsed Mobile-Style Preview Grid (icon area + label, all inside window) -->
+                <Grid x:Name="CollapsedView" MouseLeftButtonDown="Header_MouseLeftButtonDown" Cursor="Hand" Background="Transparent">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Icon preview grid -->
+                    <Border Grid.Row="0" Background="Transparent" Style="{StaticResource FluidDeckHeaderStyle}"
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <ItemsControl x:Name="MiniGrid" ItemsSource="{Binding Items}" 
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                                      Width="56" Height="56" ClipToBounds="True">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="2" Rows="2" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Image Source="{Binding Icon}" Width="22" Height="22" Margin="2" Stretch="Uniform"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                    
+                    <!-- Folder Name Label (inside the border, below the icon) -->
+                    <TextBlock x:Name="FolderLabelText" Grid.Row="1" Text="{Binding CategoryName}" 
+                               Foreground="White" FontWeight="SemiBold" FontSize="11" 
+                               HorizontalAlignment="Center" TextAlignment="Center"
+                               Margin="2,0,2,4" TextTrimming="CharacterEllipsis"
+                               IsHitTestVisible="False">
+                        <TextBlock.Effect>
+                            <DropShadowEffect BlurRadius="4" ShadowDepth="1" Color="Black" Opacity="0.8"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
+                </Grid>
+
+                <!-- 2. Expanded Popup Content -->
+                <Grid x:Name="ExpandedView" Visibility="Collapsed" Opacity="0"
+                      AllowDrop="True" Drop="Panel_Drop" DragEnter="Panel_DragEnter" DragOver="Panel_DragEnter">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/> 
+                        <RowDefinition Height="*"/> 
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Header (only this area triggers drag/collapse) -->
+                    <Border Grid.Row="0" Padding="15,15,15,5" Cursor="Hand"
+                            MouseLeftButtonDown="Header_MouseLeftButtonDown" Background="Transparent">
+                        <TextBlock Text="{Binding CategoryName}" Foreground="White" FontWeight="SemiBold" FontSize="16" HorizontalAlignment="Center"/>
+                    </Border>
+                    
+                    <!-- Content Grid -->
+                    <ListBox x:Name="FileListBox" Grid.Row="1" Background="Transparent" 
+                             BorderThickness="0" Margin="5" 
+                             ItemsSource="{Binding Items}"
+                             HorizontalContentAlignment="Stretch"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             ScrollViewer.PanningMode="Both"
+                             ScrollViewer.CanContentScroll="True"
+                             AllowDrop="True" Drop="Panel_Drop" DragEnter="Panel_DragEnter" DragOver="Panel_DragEnter">
+
+                        <ListBox.LayoutTransform>
+                            <ScaleTransform ScaleX="{Binding IconScale}" ScaleY="{Binding IconScale}" />
+                        </ListBox.LayoutTransform>
+                        
+                        <ListBox.Style>
+                            <Style TargetType="ListBox">
+                                <Setter Property="ItemsPanel">
+                                    <Setter.Value>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel IsItemsHost="True" Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.Style>
+                        
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                <!-- Override default template to completely remove the sharp blue selection background -->
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <ContentPresenter />
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="5" Margin="4" CornerRadius="12" Background="Transparent"
+                                        Style="{StaticResource FluidDeckItemStyle}"
+                                        MouseLeftButtonDown="FileItem_MouseDown"
+                                        MouseLeftButtonUp="FileItem_MouseUp"
+                                        MouseMove="FileItem_MouseMove"
+                                        Width="75" MinHeight="60" HorizontalAlignment="Stretch"
+                                        RenderTransformOrigin="0.5,0.5">
+                                    
+                                    <Border.RenderTransform>
+                                        <ScaleTransform ScaleX="1" ScaleY="1" />
+                                    </Border.RenderTransform>
+
+                                    <!-- Fluid Hover & Click Animations -->
+                                    <Border.Triggers>
+                                        <!-- Hover Enter -->
+                                        <EventTrigger RoutedEvent="UIElement.MouseEnter">
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" To="1.05" Duration="0:0:0.15">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <BackEase EasingMode="EaseOut" Amplitude="0.5"/>
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" To="1.05" Duration="0:0:0.15">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <BackEase EasingMode="EaseOut" Amplitude="0.5"/>
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                        <!-- Hover Leave -->
+                                        <EventTrigger RoutedEvent="UIElement.MouseLeave">
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" To="1.0" Duration="0:0:0.25">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <QuarticEase EasingMode="EaseOut"/>
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" To="1.0" Duration="0:0:0.25">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <QuarticEase EasingMode="EaseOut"/>
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                        <!-- Mouse Down (Click compress) -->
+                                        <EventTrigger RoutedEvent="UIElement.PreviewMouseLeftButtonDown">
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" To="0.95" Duration="0:0:0.1" />
+                                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" To="0.95" Duration="0:0:0.1" />
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                        <!-- Mouse Up (Release bounce) -->
+                                        <EventTrigger RoutedEvent="UIElement.PreviewMouseLeftButtonUp">
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" To="1.05" Duration="0:0:0.2">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <BackEase EasingMode="EaseOut" Amplitude="1.5"/>
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" To="1.05" Duration="0:0:0.2">
+                                                        <DoubleAnimation.EasingFunction>
+                                                            <BackEase EasingMode="EaseOut" Amplitude="1.5"/>
+                                                        </DoubleAnimation.EasingFunction>
+                                                    </DoubleAnimation>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Border.Triggers>
+
+                                    <Grid>
+                                        <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center">
+                                            <Image Source="{Binding Icon}" MaxWidth="45" MaxHeight="45" Stretch="Uniform" 
+                                                   RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                                            <TextBlock Text="{Binding FileName}" Foreground="White" 
+                                                       HorizontalAlignment="Center" TextAlignment="Center" 
+                                                       Margin="0,8,0,0" TextTrimming="CharacterEllipsis" 
+                                                       MaxHeight="35" TextWrapping="Wrap" FontSize="11"
+                                                       FontWeight="Medium"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Open File Location" Click="MenuItemOpenLocation_Click" />
+                                            <MenuItem Header="Rename" Click="MenuItemRename_Click" />
+                                            <Separator />
+                                            <MenuItem Header="Remove Item" Click="MenuItemRemoveFile_Click" Foreground="Red" />
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Grid>
+        </Border>
+
+    </Grid>
+</UserControl>

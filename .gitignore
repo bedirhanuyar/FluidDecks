@@ -1,0 +1,23 @@
+# .NET Core
+/bin/
+/obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.dll
+*.exe
+
+# Visual Studio
+.vs/
+.vscode/
+
+# Config files (Optional but usually good to ignore local app data if created here)
+fluid_config.json
+fluid_config.bak.json
+fluid_config.tmp.json
+
+# Build outputs
+/Publish/
+/Release/
+/Debug/

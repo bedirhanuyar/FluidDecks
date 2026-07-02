@@ -1,0 +1,227 @@
+<ui:FluentWindow x:Class="FluidDecks.UI.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="FluidDecks Settings" Width="720" Height="650"
+        WindowStartupLocation="CenterScreen"
+        WindowBackdropType="Mica"
+        WindowCornerPreference="Round"
+        ExtendsContentIntoTitleBar="True">
+    
+    <Window.Background>
+        <!-- Purple Translucent Theme -->
+        <SolidColorBrush Color="#181024" Opacity="0.80"/>
+    </Window.Background>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <ui:TitleBar Title="FluidDecks Settings" Grid.Row="0" Background="Transparent" Foreground="#F0E6FF">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://siteoforigin:,,,/Icon75.png" Width="16" Height="16" Margin="10,0,0,0"/>
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
+        
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <Border Grid.Column="0" Background="#10FFFFFF" BorderThickness="0,0,1,0" BorderBrush="#20FFFFFF"/>
+            
+            <TabControl Grid.ColumnSpan="2" Margin="0,12,0,0" Background="Transparent" BorderThickness="0">
+                <TabControl.Template>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" IsItemsHost="True" Margin="0,0,0,0"/>
+                            <ContentPresenter Grid.Column="1" ContentSource="SelectedContent"/>
+                        </Grid>
+                    </ControlTemplate>
+                </TabControl.Template>
+                <TabControl.Resources>
+                    <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
+                        <Setter Property="Margin" Value="4,2,4,2"/>
+                        <Setter Property="Padding" Value="12,10"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="#D0C0E0"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#25FFFFFF"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#15FFFFFF"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TabControl.Resources>
+
+                <!-- ═══════════════════ LAYOUT TAB ═══════════════════ -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Grid24" Margin="0,0,12,0"/>
+                            <TextBlock Text="Layout" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,0,24,0">
+                        <StackPanel Margin="0,0,0,24">
+                            <TextBlock Text="Folder Layout Mode" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#F0E6FF"/>
+                            <ComboBox x:Name="FolderModeComboBox" Margin="0,0,0,12" SelectionChanged="FolderModeComboBox_SelectionChanged">
+                                <ComboBoxItem Content="Mirror Desktop (Exact Folders)"/>
+                                <ComboBoxItem Content="Category Based (Types)"/>
+                                <ComboBoxItem Content="Virtual Decks (Custom Virtual Folders)"/>
+                            </ComboBox>
+                            
+                            <TextBlock Text="Max Desktop Folder Depth (Mirror Mode)" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#F0E6FF"/>
+                            <Slider x:Name="MaxDepthSlider" Minimum="1" Maximum="10" TickFrequency="1" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" Margin="0,0,0,12" ValueChanged="MaxDepthSlider_ValueChanged" PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"/>
+                            
+                            <TextBlock Text="Icon Scale Multiplier" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#F0E6FF"/>
+                            <Slider x:Name="IconScaleSlider" Minimum="0.5" Maximum="3.0" TickFrequency="0.1" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="1" Margin="0,0,0,12" ValueChanged="IconScaleSlider_ValueChanged" PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"/>
+                            
+                            <TextBlock Text="Popup Max Screen Ratio" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#F0E6FF"/>
+                            <Slider x:Name="PopupRatioSlider" Minimum="0.3" Maximum="0.95" TickFrequency="0.05" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2" Margin="0,0,0,12" ValueChanged="PopupRatioSlider_ValueChanged" PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- ═══════════════════ APPEARANCE TAB ═══════════════════ -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Color24" Margin="0,0,12,0"/>
+                            <TextBlock Text="Appearance" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,0,24,0">
+                        <StackPanel Margin="0,0,0,24">
+                            <TextBlock x:Name="CollapsedRadiusLabel" Text="Collapsed Corner Radius" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#F0E6FF"/>
+                            <Slider x:Name="CollapsedRadiusSlider" Minimum="0" Maximum="30" TickFrequency="1" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" Margin="0,0,0,12" ValueChanged="CollapsedRadiusSlider_ValueChanged" PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"/>
+                            
+                            <TextBlock x:Name="ExpandedRadiusLabel" Text="Expanded Corner Radius" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#F0E6FF"/>
+                            <Slider x:Name="ExpandedRadiusSlider" Minimum="0" Maximum="40" TickFrequency="1" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="0" Margin="0,0,0,12" ValueChanged="ExpandedRadiusSlider_ValueChanged" PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"/>
+
+                            <StackPanel x:Name="DwmCornerPanel" Visibility="Collapsed" Margin="0,0,0,12">
+                                <TextBlock Text="Blur Corner Style (Windows 11 Override)" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#FFD0A0"/>
+                                <ComboBox x:Name="DwmCornerComboBox" SelectionChanged="DwmCornerComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="Rectangle (Sharp)"/>
+                                    <ComboBoxItem Content="Rounded Small (4px)"/>
+                                    <ComboBoxItem Content="Rounded (8px)"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <CheckBox x:Name="BlurCheckBox" Margin="0,0,0,8" Content="Enable Background Effects" Foreground="#F0E6FF" VerticalAlignment="Top" Checked="BlurCheckBox_Changed" Unchecked="BlurCheckBox_Changed"/>
+
+                            <TextBlock x:Name="BlurModeLabel" Text="Background Effect Type" FontWeight="SemiBold" Margin="0,4,0,5" Foreground="#F0E6FF"/>
+                            <ComboBox x:Name="BlurModeComboBox" Margin="0,0,0,12" SelectionChanged="BlurModeComboBox_SelectionChanged">
+                                <ComboBoxItem Content="None (Transparent)"/>
+                                <ComboBoxItem Content="Standard Blur (Aero Glass)"/>
+                                <ComboBoxItem Content="Acrylic (Frosted Glass)"/>
+                                <ComboBoxItem Content="Color Tint Only (No Blur)"/>
+                            </ComboBox>
+
+                            <TextBlock x:Name="BgOpacityLabel" Text="Background Opacity (Desktop Visibility)" FontWeight="SemiBold" Margin="0,4,0,5" Foreground="#F0E6FF"/>
+                            <Slider x:Name="BgOpacitySlider" Minimum="0" Maximum="1.0" TickFrequency="0.05" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2" Margin="0,0,0,12" ValueChanged="BgOpacitySlider_ValueChanged" PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"/>
+
+                            <TextBlock x:Name="BlurTintLabel" Text="Tint Color Intensity" FontWeight="SemiBold" Margin="0,4,0,5" Foreground="#F0E6FF"/>
+                            <Slider x:Name="BlurTintOpacitySlider" Minimum="0" Maximum="1.0" TickFrequency="0.05" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2" Margin="0,0,0,12" ValueChanged="BlurTintOpacitySlider_ValueChanged" PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"/>
+
+                            <TextBlock x:Name="BlurColorLabel" Text="Blur Tint Color" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#F0E6FF"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                <RadioButton x:Name="ColorBlack" Content="Dark" Foreground="#F0E6FF" GroupName="BlurColor" Margin="0,0,14,0" Checked="BlurColor_Changed"/>
+                                <RadioButton x:Name="ColorWhite" Content="Light" Foreground="#F0E6FF" GroupName="BlurColor" Margin="0,0,14,0" Checked="BlurColor_Changed"/>
+                                <RadioButton x:Name="ColorBlue" Content="Blue" Foreground="#F0E6FF" GroupName="BlurColor" Margin="0,0,14,0" Checked="BlurColor_Changed"/>
+                                <RadioButton x:Name="ColorPurple" Content="Purple" Foreground="#F0E6FF" GroupName="BlurColor" Checked="BlurColor_Changed"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- ═══════════════════ ANIMATIONS & PHYSICS TAB ═══════════════════ -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Flash24" Margin="0,0,12,0"/>
+                            <TextBlock Text="Animations" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,0,24,0">
+                        <StackPanel Margin="0,0,0,24">
+                            <CheckBox x:Name="PhysicsCheckBox" Margin="0,0,0,12" Foreground="#F0E6FF" Content="Enable Folder Throw Physics (Inertia)" VerticalAlignment="Top" Checked="PhysicsCheckBox_Changed" Unchecked="PhysicsCheckBox_Changed"/>
+
+                            <TextBlock Text="Animation Easing Style" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#F0E6FF"/>
+                            <ComboBox x:Name="EasingComboBox" Margin="0,0,0,12" SelectionChanged="EasingComboBox_SelectionChanged">
+                                <ComboBoxItem Content="Smooth (Quartic)"/>
+                                <ComboBoxItem Content="Snappy (Cubic)"/>
+                                <ComboBoxItem Content="Bouncy (Back)"/>
+                            </ComboBox>
+
+                            <TextBlock Text="Animation Speed Multiplier" FontWeight="SemiBold" Margin="0,0,0,5" Foreground="#F0E6FF"/>
+                            <Slider x:Name="AnimSpeedSlider" Minimum="0.25" Maximum="3.0" TickFrequency="0.25" IsSnapToTickEnabled="True" IsMoveToPointEnabled="True" AutoToolTipPlacement="TopLeft" AutoToolTipPrecision="2" Margin="0,0,0,12" ValueChanged="AnimSpeedSlider_ValueChanged" PreviewMouseLeftButtonDown="Slider_PreviewMouseLeftButtonDown"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- ═══════════════════ BEHAVIOR TAB ═══════════════════ -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Wrench24" Margin="0,0,12,0"/>
+                            <TextBlock Text="Behavior" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,0,24,0">
+                        <StackPanel Margin="0,0,0,24">
+                            <CheckBox x:Name="PauseCheckBox" Margin="0,0,0,8" Foreground="#F0E6FF" Content="Pause FluidDecks (Hide Widgets)" VerticalAlignment="Top" Checked="PauseCheckBox_Changed" Unchecked="PauseCheckBox_Changed"/>
+
+                            <CheckBox x:Name="VirtualFolderAppCheckBox" Margin="0,0,0,16" Foreground="#F0E6FF" Content="Open Virtual Folders inside App (Instead of Explorer)" VerticalAlignment="Top" Checked="VirtualFolderAppCheckBox_Changed" Unchecked="VirtualFolderAppCheckBox_Changed"/>
+
+                            <Button x:Name="RefreshBtn" Content="Sync Desktop Positions" HorizontalAlignment="Left" Click="RefreshPositions_Click" Margin="0,0,0,0"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+
+                <!-- ═══════════════════ ADVANCED TAB ═══════════════════ -->
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Code24" Margin="0,0,12,0"/>
+                            <TextBlock Text="Advanced" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,0,24,0">
+                        <StackPanel Margin="0,0,0,24">
+                            <TextBlock Text="Configuration Data" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,10" Foreground="#F0E6FF"/>
+                            
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                <Button Content="Export Config" Margin="0,0,10,0" Click="ExportConfig_Click" Background="#20FFFFFF" BorderThickness="1" BorderBrush="#30FFFFFF"/>
+                                <Button Content="Import Config" Click="ImportConfig_Click" Background="#20FFFFFF" BorderThickness="1" BorderBrush="#30FFFFFF"/>
+                            </StackPanel>
+
+                            <Separator Margin="0,0,0,16" Background="#20FFFFFF"/>
+
+                            <CheckBox x:Name="DevModeCheckBox" Margin="0,0,0,8" Foreground="#F0E6FF" Content="Developer Mode (Detailed Logging)" VerticalAlignment="Top" Checked="DevModeCheckBox_Changed" Unchecked="DevModeCheckBox_Changed"/>
+
+                            <CheckBox x:Name="ExperimentalCheckBox" Margin="0,0,0,12" Foreground="#F0E6FF" Content="Enable Experimental Features" VerticalAlignment="Top" Checked="ExperimentalCheckBox_Changed" Unchecked="ExperimentalCheckBox_Changed"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+        </Grid>
+
+        <!-- Close Button Area -->
+        <Border Grid.Row="2" Background="#0A000000" Padding="24,12,24,12" BorderThickness="0,1,0,0" BorderBrush="#20FFFFFF">
+            <Button Content="Close Settings" HorizontalAlignment="Right" Click="CloseButton_Click" Width="140" Height="32" Background="#8A2BE2" Foreground="White" FontWeight="SemiBold" BorderThickness="0"/>
+        </Border>
+    </Grid>
+</ui:FluentWindow>

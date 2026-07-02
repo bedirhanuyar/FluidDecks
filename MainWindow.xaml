@@ -1,0 +1,42 @@
+<Window x:Class="FluidDecks.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FluidDecks"
+        xmlns:controls="clr-namespace:FluidDecks.UI.Controls"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:xf="clr-namespace:XamlFlair;assembly=XamlFlair.WPF"
+        xmlns:tb="http://www.hardcodet.net/taskbar"
+        mc:Ignorable="d"
+        Top="0" Left="0"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" ResizeMode="NoResize">
+
+    <!-- 
+        We use RenderOptions.CachingHint="Cache" to enforce GPU bitmap caching
+        to maintain 60+ FPS on animations.
+    -->
+    <Grid RenderOptions.CachingHint="Cache" RenderOptions.BitmapScalingMode="HighQuality">
+        
+        <!-- Taskbar Icon -->
+        <tb:TaskbarIcon x:Name="SysTrayIcon" ToolTipText="FluidDecks">
+            <tb:TaskbarIcon.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Settings" Click="MenuItemSettings_Click" />
+                    <MenuItem Header="Add Virtual Folder" Click="MenuItemAddVirtual_Click" />
+                    <MenuItem Header="Pause / Resume" Click="MenuItemPause_Click" />
+                    <Separator />
+                    <MenuItem Header="Exit" Click="MenuItemExit_Click" />
+                </ContextMenu>
+            </tb:TaskbarIcon.ContextMenu>
+        </tb:TaskbarIcon>
+        <Grid x:Name="AppRootGrid" RenderOptions.BitmapScalingMode="HighQuality">
+            <Grid.LayoutTransform>
+                <ScaleTransform ScaleX="{Binding GlobalScale}" ScaleY="{Binding GlobalScale}" />
+            </Grid.LayoutTransform>
+            
+            <Grid Background="Transparent" />
+        </Grid>
+    </Grid>
+</Window>
