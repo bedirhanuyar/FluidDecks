@@ -1,4 +1,6 @@
-# ![projecticon](Icon.svg) FluidDecks
+<img src="Icon.svg" width="150" alt="logo">
+
+# FluidDecks
 
 **A modern, highly optimized, and beautifully animated desktop organization utility for Windows.**
 
