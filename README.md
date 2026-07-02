@@ -2,7 +2,7 @@
   <img src="Icon.svg" width="200" alt="logo">
 </p>
 
-# FluidDecks
+# FluidDecks ⚠️ *(Alpha)*
 
 **A modern, highly optimized, and beautifully animated desktop organization utility for Windows.**
 
