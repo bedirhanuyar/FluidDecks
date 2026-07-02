@@ -1,4 +1,4 @@
-# 🌊 FluidDecks
+# ![projecticon](Icon.svg) FluidDecks
 
 **A modern, highly optimized, and beautifully animated desktop organization utility for Windows.**
 
