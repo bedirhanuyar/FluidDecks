@@ -1,4 +1,6 @@
-<img src="Icon.svg" width="150" alt="logo">
+<p align="center">
+  <img src="Icon.svg" width="150" alt="logo">
+</p>
 
 # FluidDecks
 
