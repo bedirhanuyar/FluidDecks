@@ -329,7 +329,6 @@ namespace FluidDecks.UI.Controls
                         }
                     }
 
-                    deckWindow?.DisableBlur();
                     _isRolledUp = true;
 
                     // Apply dynamic corner radius from config
@@ -338,6 +337,11 @@ namespace FluidDecks.UI.Controls
                     
                     CollapsedView.Visibility = Visibility.Visible;
                     ExpandedView.Visibility = Visibility.Collapsed;
+
+                    // Strip DWM blur/tint during the shrink animation so the oversized
+                    // window area is invisible. Only the RootBorder's own background
+                    // (semi-transparent) is visible while it animates down.
+                    deckWindow?.DisableBlur();
 
                     // Read animation settings
                     int easingType = mainViewModel?.AppConfigManager?.CurrentConfig?.AnimationEasing ?? 0;
@@ -369,7 +373,7 @@ namespace FluidDecks.UI.Controls
                         RootBorder.Width = COLLAPSED_WIDTH;
                         RootBorder.Height = COLLAPSED_HEIGHT;
                         
-                        // INSTANTLY snap the transparent window down to match AFTER the visual animation is done
+                        // Snap the transparent window to collapsed size after animation
                         if (deckWindow != null) {
                             deckWindow.BeginAnimation(Window.WidthProperty, null);
                             deckWindow.BeginAnimation(Window.HeightProperty, null);
@@ -381,7 +385,8 @@ namespace FluidDecks.UI.Controls
                         ExpandedView.Height = double.NaN;
                         FileListBox.Visibility = Visibility.Collapsed;
                         ReleaseResources();
-                        deckWindow?.DisableBlur();
+                        // Re-apply blur at the collapsed size now that the window matches
+                        deckWindow?.EnableBlur();
                         _isAnimating = false;
                         FluidDecks.Core.Logging.Logger.Log($"Collapsed folder {ViewModel?.CategoryName}", "INFO");
                     };
