@@ -442,5 +442,24 @@ namespace FluidDecks.UI
             }
             return null;
         }
+
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+                e.Handled = true;
+            }
+            catch (Exception ex)
+            {
+                FluidDecks.Core.Logging.Logger.Log("Failed to open hyperlink.", "ERROR", ex);
+            }
+        }
+
+        private void BuyCoffee_Click(object sender, RoutedEventArgs e)
+        {
+            // Placeholder for future link
+            MessageBox.Show("Thank you for your support! Link coming soon.", "Buy us a coffee", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
     }
 }

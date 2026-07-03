@@ -30,7 +30,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- Logo -->
-            <Image Source="pack://siteoforigin:,,,/Icon75.png" Width="140" Height="140" VerticalAlignment="Top" Margin="0,20,30,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+            <Image Source="pack://application:,,,/Icon75.png" Width="140" Height="140" VerticalAlignment="Top" Margin="0,20,30,0" RenderOptions.BitmapScalingMode="HighQuality"/>
 
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                 <TextBlock Text="Welcome to FluidDecks!" FontSize="32" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,0,0,10"/>

@@ -16,6 +16,17 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // Apply WPF-UI Dark Theme and Purple Accent (#8A2BE2)
+        Wpf.Ui.Appearance.ApplicationThemeManager.Apply(
+            Wpf.Ui.Appearance.ApplicationTheme.Dark,
+            Wpf.Ui.Controls.WindowBackdropType.None,
+            false // Don't override window properties globally, we handle them per-window
+        );
+        Wpf.Ui.Appearance.ApplicationAccentColorManager.Apply(
+            System.Windows.Media.Color.FromRgb(138, 43, 226),
+            Wpf.Ui.Appearance.ApplicationTheme.Dark
+        );
+
         Logger.Log("FluidDecks application starting...", "INFO");
 
         // Catch exceptions from UI thread
