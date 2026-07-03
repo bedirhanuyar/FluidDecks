@@ -1,5 +1,5 @@
-$pngPath = "C:\FluidDecks\Icon.png"
-$icoPath = "C:\FluidDecks\Icon.ico"
+$pngPath = Join-Path $PSScriptRoot "Icon.png"
+$icoPath = Join-Path $PSScriptRoot "Icon.ico"
 
 $pngBytes = [System.IO.File]::ReadAllBytes($pngPath)
 
