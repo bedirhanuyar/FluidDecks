@@ -638,6 +638,34 @@ namespace FluidDecks.UI.Controls
             e.Handled = true;
         }
 
+        private void ContextMenu_Opened(object sender, RoutedEventArgs e)
+        {
+            var mainViewModel = Application.Current.MainWindow?.DataContext as UI.ViewModels.MainViewModel;
+            if (mainViewModel?.AppConfigManager.CurrentConfig.FolderLayoutMode == Core.Configuration.FolderMode.VirtualDecks)
+            {
+                var panelConfig = mainViewModel.AppConfigManager.CurrentConfig.Panels.FirstOrDefault(p => p.CategoryName == ViewModel.CategoryName);
+                if (panelConfig != null)
+                {
+                    MenuItemLock.Header = panelConfig.IsPositionLocked ? "Unlock Position" : "Lock Position";
+                    MenuItemLock.Icon = panelConfig.IsPositionLocked ? "🔒" : "🔓";
+                }
+            }
+        }
+
+        private void MenuItemLock_Click(object sender, RoutedEventArgs e)
+        {
+            var mainViewModel = Application.Current.MainWindow?.DataContext as UI.ViewModels.MainViewModel;
+            if (mainViewModel?.AppConfigManager.CurrentConfig.FolderLayoutMode == Core.Configuration.FolderMode.VirtualDecks)
+            {
+                var panelConfig = mainViewModel.AppConfigManager.CurrentConfig.Panels.FirstOrDefault(p => p.CategoryName == ViewModel.CategoryName);
+                if (panelConfig != null)
+                {
+                    panelConfig.IsPositionLocked = !panelConfig.IsPositionLocked;
+                    mainViewModel.AppConfigManager.SaveConfig();
+                }
+            }
+        }
+
         private void MenuItemDeleteFolder_Click(object sender, RoutedEventArgs e)
         {
             var mainViewModel = Application.Current.MainWindow?.DataContext as UI.ViewModels.MainViewModel;

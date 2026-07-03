@@ -116,6 +116,7 @@ namespace FluidDecks.Core.Configuration
         public double X { get; set; } = 100;
         public double Y { get; set; } = 100;
         public double Width { get; set; } = 250;
+        public bool IsPositionLocked { get; set; } = false;
         public FolderMode ModeOwner { get; set; } = FolderMode.MirrorDesktop;
         public List<string> VirtualItems { get; set; } = new List<string>();
         public System.Collections.Generic.List<string> VirtualFolders { get; set; } = new System.Collections.Generic.List<string>();

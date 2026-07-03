@@ -29,8 +29,10 @@
                 <Thickness Left="1" Top="1" Right="1" Bottom="1"/>
             </Border.BorderThickness>
             <Border.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Delete Virtual Folder" Click="MenuItemDeleteFolder_Click" />
+                <ContextMenu Opened="ContextMenu_Opened">
+                    <MenuItem x:Name="MenuItemLock" Header="Lock Position" Click="MenuItemLock_Click" />
+                    <Separator />
+                    <MenuItem Header="Delete Virtual Folder" Click="MenuItemDeleteFolder_Click" Foreground="Red" />
                 </ContextMenu>
             </Border.ContextMenu>
             

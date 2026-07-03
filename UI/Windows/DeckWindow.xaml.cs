@@ -82,10 +82,6 @@ namespace FluidDecks.UI.Windows
             var blurMode = config?.BackgroundBlurMode ?? BlurMode.Standard;
             double bgOpacity = config?.BackgroundOpacity ?? 0.5;
 
-            // When opacity is very low, skip the DWM blur entirely for a clear see-through effect.
-            // This prevents the heavy frosted-glass look when the user wants near-full transparency.
-            bool suppressDwmBlur = bgOpacity < 0.15;
-
             // WIN11 BUGFIX: Standard Blur (Mica or WCA BlurBehind) renders as solid black on frameless overlays.
             // Force Standard Blur to Acrylic to prevent the black screen.
             if (blurMode == BlurMode.Standard) 
@@ -102,7 +98,7 @@ namespace FluidDecks.UI.Windows
             }
             catch { }
 
-            int backdropType = (blurMode == BlurMode.Acrylic && !suppressDwmBlur) ? User32.DWMSBT_TRANSIENTWINDOW : User32.DWMSBT_NONE;
+            int backdropType = (blurMode == BlurMode.Acrylic) ? User32.DWMSBT_TRANSIENTWINDOW : User32.DWMSBT_NONE;
             
             if (blurMode != BlurMode.None && blurMode != BlurMode.Transparent)
             {
@@ -232,8 +228,7 @@ namespace FluidDecks.UI.Windows
             int preference = User32.DWMWCP_ROUND;
             User32.DwmSetWindowAttribute(hwnd, User32.DWMWA_WINDOW_CORNER_PREFERENCE, ref preference, sizeof(int));
 
-            // Start with NO blur — blur is applied only when the popup expands
-            RemoveAcrylicBlur();
+            EnableBlur();
         }
 
         protected override void OnStateChanged(EventArgs e)
@@ -265,20 +260,15 @@ namespace FluidDecks.UI.Windows
 
         /// <summary>
         /// Disables blur behind the window.
-        /// Called when the popup collapses for a clean transparent look.
         /// </summary>
         public void DisableBlur()
         {
-            RemoveAcrylicBlur();
+            // Blur is now always on, we don't disable it on collapse
         }
 
         public void UpdateBlurIfExpanded()
         {
-            // If window is expanded, Height is greater than the default 110
-            if (this.Height > 150)
-            {
-                EnableBlur();
-            }
+            EnableBlur();
         }
 
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -334,6 +324,12 @@ namespace FluidDecks.UI.Windows
             {
                 var wndPos = (User32.WINDOWPOS)System.Runtime.InteropServices.Marshal.PtrToStructure(lParam, typeof(User32.WINDOWPOS));
                 
+                var panelConfig = this.DataContext as PanelConfig;
+                if (panelConfig != null && panelConfig.IsPositionLocked)
+                {
+                    wndPos.flags |= 0x0002; // SWP_NOMOVE
+                }
+
                 // Track position history for velocity
                 if (_isDragging)
                 {
