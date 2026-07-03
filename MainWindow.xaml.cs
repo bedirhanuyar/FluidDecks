@@ -156,7 +156,7 @@ namespace FluidDecks
                     // Restore blur for any panels that were expanded before pausing
                     if (win is UI.Windows.DeckWindow dw)
                     {
-                        dw.UpdateBlurIfExpanded();
+                        dw.RefreshVisuals();
                     }
                 }
             }

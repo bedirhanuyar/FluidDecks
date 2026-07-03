@@ -266,9 +266,26 @@ namespace FluidDecks.UI.Windows
             // Blur is now always on, we don't disable it on collapse
         }
 
-        public void UpdateBlurIfExpanded()
+        public void RefreshVisuals()
         {
+            var mainVM = Application.Current?.MainWindow?.DataContext as UI.ViewModels.MainViewModel;
+            IntPtr hwnd = new WindowInteropHelper(this).Handle;
+            
+            if (mainVM != null && hwnd != IntPtr.Zero)
+            {
+                int preference = User32.DWMWCP_ROUND;
+                int pref = mainVM.AppConfigManager.CurrentConfig.BlurCornerPreference;
+                if (pref == 0) preference = User32.DWMWCP_DONOTROUND;
+                else if (pref == 1) preference = User32.DWMWCP_ROUNDSMALL;
+                User32.DwmSetWindowAttribute(hwnd, User32.DWMWA_WINDOW_CORNER_PREFERENCE, ref preference, sizeof(int));
+            }
+
             EnableBlur();
+
+            if (MainGrid != null && MainGrid.Children.Count > 0 && MainGrid.Children[0] is UI.Controls.DeckPanel panel)
+            {
+                panel.RefreshCornerRadius();
+            }
         }
 
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)

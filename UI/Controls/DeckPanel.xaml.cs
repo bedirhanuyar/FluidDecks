@@ -413,6 +413,34 @@ namespace FluidDecks.UI.Controls
             GC.Collect(0, GCCollectionMode.Optimized);
         }
 
+        public void RefreshCornerRadius()
+        {
+            var mainViewModel = Application.Current.MainWindow?.DataContext as UI.ViewModels.MainViewModel;
+            if (mainViewModel == null) return;
+
+            if (_isRolledUp)
+            {
+                double collapsedRadius = mainViewModel.AppConfigManager.CurrentConfig.CollapsedCornerRadius;
+                RootBorder.CornerRadius = new CornerRadius(collapsedRadius);
+            }
+            else
+            {
+                double expandedRadius = mainViewModel.AppConfigManager.CurrentConfig.ExpandedCornerRadius;
+                if (mainViewModel.AppConfigManager.CurrentConfig.EnableBlurEffect)
+                {
+                    var blurMode = mainViewModel.AppConfigManager.CurrentConfig.BackgroundBlurMode;
+                    if (blurMode == FluidDecks.Core.Configuration.BlurMode.Acrylic || blurMode == FluidDecks.Core.Configuration.BlurMode.Standard)
+                    {
+                        int pref = mainViewModel.AppConfigManager.CurrentConfig.BlurCornerPreference;
+                        if (pref == 0) expandedRadius = 0;
+                        else if (pref == 1) expandedRadius = 4;
+                        else if (pref == 2) expandedRadius = 8;
+                    }
+                }
+                RootBorder.CornerRadius = new CornerRadius(expandedRadius);
+            }
+        }
+
         private void ReloadResources()
         {
             if (ViewModel == null) return;

@@ -155,6 +155,7 @@ namespace FluidDecks.UI
             if (_isInitializing || _configManager == null) return;
             _configManager.CurrentConfig.CollapsedCornerRadius = e.NewValue;
             _configManager.SaveConfig();
+            LiveUpdateDecksBlur();
         }
 
         private void ExpandedRadiusSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -162,6 +163,7 @@ namespace FluidDecks.UI
             if (_isInitializing || _configManager == null) return;
             _configManager.CurrentConfig.ExpandedCornerRadius = e.NewValue;
             _configManager.SaveConfig();
+            LiveUpdateDecksBlur();
         }
 
         private void PhysicsCheckBox_Changed(object sender, RoutedEventArgs e)
@@ -334,7 +336,7 @@ namespace FluidDecks.UI
             {
                 if (window is Windows.DeckWindow deck)
                 {
-                    deck.UpdateBlurIfExpanded();
+                    deck.RefreshVisuals();
                 }
             }
         }
