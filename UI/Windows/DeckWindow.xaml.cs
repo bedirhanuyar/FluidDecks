@@ -169,7 +169,7 @@ namespace FluidDecks.UI.Windows
             IntPtr hwnd = new WindowInteropHelper(this).Handle;
             if (hwnd == IntPtr.Zero) return;
 
-            // Clear WCA first
+            // Clear WCA accent policy to remove any active blur/acrylic effect
             var accent = new AccentPolicy 
             { 
                 AccentState = AccentState.ACCENT_DISABLED,
@@ -190,16 +190,20 @@ namespace FluidDecks.UI.Windows
             User32.SetWindowCompositionAttribute(hwnd, ref data);
             System.Runtime.InteropServices.Marshal.FreeHGlobal(accentPtr);
 
-            // Then clear Backdrop
+            // Clear the DWM system backdrop so the OS stops rendering blur behind this window
             int backdropType = User32.DWMSBT_NONE;
             User32.DwmSetWindowAttribute(hwnd, User32.DWMWA_SYSTEMBACKDROP_TYPE, ref backdropType, System.Runtime.InteropServices.Marshal.SizeOf(typeof(int)));
+
+            // Reset DWM corner preference to OS default so it doesn't fight with WPF CornerRadius
+            int defaultCorner = User32.DWMWCP_DEFAULT;
+            User32.DwmSetWindowAttribute(hwnd, User32.DWMWA_WINDOW_CORNER_PREFERENCE, ref defaultCorner, sizeof(int));
 
             if (MainGrid != null)
             {
                 MainGrid.Background = System.Windows.Media.Brushes.Transparent;
             }
 
-            // Force the window to repaint itself cleanly
+            // Force the window to repaint itself cleanly after removing blur
             User32.RedrawWindow(hwnd, IntPtr.Zero, IntPtr.Zero, 
                 User32.RedrawWindowFlags.Invalidate | User32.RedrawWindowFlags.UpdateNow | User32.RedrawWindowFlags.AllChildren);
         }
@@ -242,12 +246,13 @@ namespace FluidDecks.UI.Windows
         }
 
         /// <summary>
-        /// Enables blur behind the window if the blur setting is on.
-        /// Called when the popup expands to give the frosted glass effect.
+        /// Enables or disables blur behind the window based on the current config.
+        /// When blur is enabled, applies the acrylic/mica backdrop effect.
+        /// When blur is disabled, actively strips DWM backdrop and WCA state so the
+        /// change takes effect immediately without requiring an app restart.
         /// </summary>
         public void EnableBlur()
         {
-            // Check config — blur is optional
             var mainVM = Application.Current?.MainWindow?.DataContext as UI.ViewModels.MainViewModel;
             bool blurEnabled = mainVM?.AppConfigManager?.CurrentConfig?.EnableBlurEffect ?? true;
             var blurMode = mainVM?.AppConfigManager?.CurrentConfig?.BackgroundBlurMode ?? BlurMode.Standard;
@@ -256,16 +261,27 @@ namespace FluidDecks.UI.Windows
             {
                 ApplyAcrylicBlur();
             }
+            else
+            {
+                // Actively remove the DWM backdrop so the blur disappears in real-time
+                RemoveAcrylicBlur();
+            }
         }
 
         /// <summary>
-        /// Disables blur behind the window.
+        /// Disables blur behind the window by stripping all DWM backdrop and WCA effects.
+        /// Called when the panel collapses or when blur is toggled off in settings.
         /// </summary>
         public void DisableBlur()
         {
-            // Blur is now always on, we don't disable it on collapse
+            RemoveAcrylicBlur();
         }
 
+        /// <summary>
+        /// Refreshes all visual properties (DWM corners, blur, WPF border radius) to match
+        /// the current config. Called after any settings change to ensure live synchronization
+        /// between the DWM native window frame and the WPF rendering layer.
+        /// </summary>
         public void RefreshVisuals()
         {
             var mainVM = Application.Current?.MainWindow?.DataContext as UI.ViewModels.MainViewModel;
@@ -273,15 +289,33 @@ namespace FluidDecks.UI.Windows
             
             if (mainVM != null && hwnd != IntPtr.Zero)
             {
-                int preference = User32.DWMWCP_ROUND;
-                int pref = mainVM.AppConfigManager.CurrentConfig.BlurCornerPreference;
-                if (pref == 0) preference = User32.DWMWCP_DONOTROUND;
-                else if (pref == 1) preference = User32.DWMWCP_ROUNDSMALL;
-                User32.DwmSetWindowAttribute(hwnd, User32.DWMWA_WINDOW_CORNER_PREFERENCE, ref preference, sizeof(int));
+                bool blurOn = mainVM.AppConfigManager.CurrentConfig.EnableBlurEffect;
+                var blurMode = mainVM.AppConfigManager.CurrentConfig.BackgroundBlurMode;
+                bool isDwmBlur = blurOn && (blurMode == BlurMode.Acrylic || blurMode == BlurMode.Standard);
+
+                if (isDwmBlur)
+                {
+                    // When DWM blur is active, sync the native window corner rounding
+                    // to the user's BlurCornerPreference (Rectangle / 4px / 8px)
+                    int preference = User32.DWMWCP_ROUND;
+                    int pref = mainVM.AppConfigManager.CurrentConfig.BlurCornerPreference;
+                    if (pref == 0) preference = User32.DWMWCP_DONOTROUND;
+                    else if (pref == 1) preference = User32.DWMWCP_ROUNDSMALL;
+                    User32.DwmSetWindowAttribute(hwnd, User32.DWMWA_WINDOW_CORNER_PREFERENCE, ref preference, sizeof(int));
+                }
+                else
+                {
+                    // When blur is off, reset DWM corners to OS default so the WPF
+                    // CornerRadius is the sole authority over visual rounding
+                    int defaultCorner = User32.DWMWCP_DEFAULT;
+                    User32.DwmSetWindowAttribute(hwnd, User32.DWMWA_WINDOW_CORNER_PREFERENCE, ref defaultCorner, sizeof(int));
+                }
             }
 
+            // Apply or remove the blur backdrop based on current config
             EnableBlur();
 
+            // Sync the WPF border corner radius to match the new blur/DWM state
             if (MainGrid != null && MainGrid.Children.Count > 0 && MainGrid.Children[0] is UI.Controls.DeckPanel panel)
             {
                 panel.RefreshCornerRadius();
