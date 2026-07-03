@@ -144,10 +144,11 @@ namespace FluidDecks.UI.Windows
 
             if (MainGrid != null)
             {
-                // Correctly composite the Black dimming (bgOpacity) and the Tint color (tintOpacity)
-                // This ensures the two sliders do distinct things (Dimming vs Color intensity).
-                double aBlack = blurMode == BlurMode.None ? 0 : bgOpacity;
-                double aTint = blurMode == BlurMode.None ? 0 : tintOpacity;
+                // Composite the dimming layer (bgOpacity) and the tint color layer (tintOpacity).
+                // Dimming only applies to blur-active modes (Acrylic/Standard) since it darkens
+                // the blurred background. Tint applies in ALL modes for visual customization.
+                double aBlack = (blurMode == BlurMode.Acrylic || blurMode == BlurMode.Standard) ? bgOpacity : 0;
+                double aTint = tintOpacity;
 
                 double aFinal = aTint + aBlack * (1.0 - aTint);
                 byte finalAlpha = (byte)(aFinal * 255);
@@ -255,10 +256,11 @@ namespace FluidDecks.UI.Windows
         {
             var mainVM = Application.Current?.MainWindow?.DataContext as UI.ViewModels.MainViewModel;
             bool blurEnabled = mainVM?.AppConfigManager?.CurrentConfig?.EnableBlurEffect ?? true;
-            var blurMode = mainVM?.AppConfigManager?.CurrentConfig?.BackgroundBlurMode ?? BlurMode.Standard;
             
-            if (blurEnabled && blurMode != BlurMode.None)
+            if (blurEnabled)
             {
+                // Route all modes (including None/Transparent) through ApplyAcrylicBlur
+                // so the tint color overlay is applied regardless of blur type
                 ApplyAcrylicBlur();
             }
             else
@@ -375,10 +377,21 @@ namespace FluidDecks.UI.Windows
             {
                 var wndPos = (User32.WINDOWPOS)System.Runtime.InteropServices.Marshal.PtrToStructure(lParam, typeof(User32.WINDOWPOS));
                 
-                var panelConfig = this.DataContext as PanelConfig;
-                if (panelConfig != null && panelConfig.IsPositionLocked)
+                // Look up the PanelConfig through MainViewModel — DataContext is a PanelViewModel,
+                // not a PanelConfig, so we resolve it via the config manager.
+                var panelVM = this.DataContext as UI.ViewModels.PanelViewModel;
+                if (panelVM != null)
                 {
-                    wndPos.flags |= 0x0002; // SWP_NOMOVE
+                    var mainVM = Application.Current?.MainWindow?.DataContext as UI.ViewModels.MainViewModel;
+                    var panels = mainVM?.AppConfigManager?.CurrentConfig?.Panels;
+                    if (panels != null)
+                    {
+                        var panelCfg = System.Linq.Enumerable.FirstOrDefault(panels, p => p.CategoryName == panelVM.CategoryName);
+                        if (panelCfg != null && panelCfg.IsPositionLocked)
+                        {
+                            wndPos.flags |= 0x0002; // SWP_NOMOVE — only position is locked, drag-drop still works
+                        }
+                    }
                 }
 
                 // Track position history for velocity
